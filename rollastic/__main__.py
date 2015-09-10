@@ -13,12 +13,11 @@ def cli():
 
 @cli.command()
 @click.argument('master_node', nargs=1)
-@click.option('--sniff', default=False, help='Enable elastic sniffer [false]', is_flag=True)
 @click.option('--masters/--no-masters', default=False, help='Restart master nodes as well [false]')
 @click.option('--datas/--no-datas', default=True, help='Restart data nodes [true]')
 @click.option('--kill-at-heap', default=85, help='Heap used percentage threshold to restart that node [85]',
               type=click.INT)
-def restart(master_node, sniff, kill_at_heap, masters, datas):
+def restart(master_node, kill_at_heap, masters, datas):
     '''
     Rolling restart of cluster.
 
@@ -44,18 +43,17 @@ def restart(master_node, sniff, kill_at_heap, masters, datas):
     '''
     _LOG.info('Rolling restart with master_node=%s kill_at_heap=%s', master_node, kill_at_heap)
 
-    cluster = Cluster(master_node, sniff=sniff)
+    cluster = Cluster(master_node)
     _LOG.info('Cluster status: %s', cluster.status())
     cluster.rolling_restart(master=masters, data=datas, heap_used_percent_threshold=kill_at_heap)
 
 
 @cli.command()
 @click.argument('master_node', nargs=1)
-@click.option('--sniff', default=False, help='Enable elastic sniffer [false]', is_flag=True)
 @click.option('--masters/--no-masters', default=False, help='Restart master nodes as well [false]')
 @click.option('--datas/--no-datas', default=True, help='Restart data nodes [true]')
 @click.option('--minimum-version', default='1.7.1', help='Minimum version to upgrade to [1.7.1]')
-def upgrade(master_node, sniff, masters, datas, minimum_version):
+def upgrade(master_node, masters, datas, minimum_version):
     '''
     Rolling upgrade of cluster.
 
@@ -84,7 +82,7 @@ def upgrade(master_node, sniff, masters, datas, minimum_version):
     '''
     _LOG.info('Rolling upgrade with master_node=%s and minimum_version=%s', master_node, minimum_version)
 
-    cluster = Cluster(master_node, sniff=sniff)
+    cluster = Cluster(master_node)
     _LOG.info('Cluster status: %s', cluster.status())
     cluster.rolling_upgrade(master=masters, data=datas, minimum_version=minimum_version)
 
