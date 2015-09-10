@@ -5,7 +5,7 @@ exec (open('rollastic/_version.py').read())
 
 conf = dict(
     name='rollastic',
-    description='ElasticSearch cluster management via SaltStack -- rolling restarts/upgrades',
+    description='Automated ElasticSearch cluster rolling restarts/upgrades via SaltStack',
     url='http://github.com/vertical-knowledge/rollastic',
     author='VK',
     author_email='vk@vertical-knowledge.com',
