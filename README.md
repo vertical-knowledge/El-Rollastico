@@ -50,12 +50,12 @@ Usage: rollastic restart [OPTIONS] MASTER_NODE
       * Wait until cluster is in green health
 
 Options:
-  --sniff                 Enable elastic sniffer [false]
-  --masters               Restart master nodes as well [false]
-  --datas                 Restart data nodes [true]
-  --kill-at-heap INTEGER  Heap used percentage threshold to restart that node
-                          [85]
-  --help                  Show this message and exit.
+  --sniff                   Enable elastic sniffer [false]
+  --masters / --no-masters  Restart master nodes as well [false]
+  --datas / --no-datas      Restart data nodes [true]
+  --kill-at-heap INTEGER    Heap used percentage threshold to restart that
+                            node [85]
+  --help                    Show this message and exit.
 ```
 
 ### Upgrade
@@ -92,9 +92,9 @@ Usage: rollastic upgrade [OPTIONS] MASTER_NODE
       * Wait until cluster is in green health
 
 Options:
-  --sniff                 Enable elastic sniffer [false]
-  --masters               Restart master nodes as well [false]
-  --datas                 Restart data nodes [true]
-  --minimum-version TEXT  Minimum version to upgrade to [1.7.1]
-  --help                  Show this message and exit.
+  --sniff                   Enable elastic sniffer [false]
+  --masters / --no-masters  Restart master nodes as well [false]
+  --datas / --no-datas      Restart data nodes [true]
+  --minimum-version TEXT    Minimum version to upgrade to [1.7.1]
+  --help                    Show this message and exit.
 ```
