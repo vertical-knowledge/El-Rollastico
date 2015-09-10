@@ -92,7 +92,7 @@ class Cluster(object):
         health = self.es.cluster.health()
         return health['status']
 
-    def wait_until_green(self):
+    def wait_until_green(self, check_every=5):
         '''
         Loops around until cluster health is green
 
@@ -104,7 +104,7 @@ class Cluster(object):
             status = self.status()
             if status == 'green':
                 return True
-            time.sleep(10)
+            time.sleep(check_every)
 
     def node_ips(self):
         '''
@@ -131,35 +131,40 @@ class Cluster(object):
         '''
         return ip in self.node_ips()
 
-    def wait_until_node_joins(self, name, freshness_window=120):
+    def wait_until_node_joins(self, name, uptime_less_than=None, freshness_window=120, check_every=5):
         '''
         Loops around waiting until a node with the specified name joins the cluster with an uptime within
         freshness_window.
 
         :param name: Node name
         :type name: str
+        :param uptime_less_than: If specified, uptime must be less than this. Meant to handle where a node was already restarted within freshness_window.
+        :type uptime_less_than: int
         :param freshness_window: How recent (in secs) the join must be to pass
         :type freshness_window: int
         :return: Node on Success
         :rtype: Node
         '''
-        # TODO This could just check old uptime vs new uptime instead of having a freshness_window. This would alleviate issues with a recently restarted node (ie within window)
-        _LOG.info('Waiting until node %s joins with a freshness_window of %d secs', name, freshness_window)
+        _LOG.info('Waiting until node %s joins with a freshness_window of %d secs and uptime_less_than=%d', name, freshness_window, uptime_less_than)
         while True:
             for n in self.iter_nodes():
                 if n.name == name:
-                    uptime = n.uptime
+                    uptime = n.uptime.total_seconds()
                     if not uptime:
                         _LOG.warn('Found node %s but uptime=%s?', n, uptime)
                         continue
-                    if freshness_window and uptime.total_seconds() > freshness_window:
+                    if freshness_window and uptime > freshness_window:
                         _LOG.debug('Found node %s but uptime=%s was under freshness_window=%ds',
-                                   name, uptime.total_seconds(), freshness_window)
+                                   name, uptime, freshness_window)
+                        continue
+                    if uptime_less_than and uptime > uptime_less_than:
+                        _LOG.debug('Found node %s but uptime=%s was above uptime_less_than=%s',
+                                   name, uptime, uptime_less_than)
                         continue
                     _LOG.info('Found node %s with uptime=%s was within freshness_window=%ds',
-                              name, uptime.total_seconds(), freshness_window)
+                              name, uptime, freshness_window)
                     return n
-            time.sleep(10)
+            time.sleep(check_every)
 
     def iter_nodes(self):
         '''
@@ -266,7 +271,7 @@ class Cluster(object):
 
             ''' Wait until node joins '''
 
-            self.wait_until_node_joins(node.name)
+            self.wait_until_node_joins(node.name, uptime_less_than=node.uptime.total_seconds())
 
         node_filter = lambda self, node: node.heap_used_percent > heap_used_percent_threshold
 
@@ -346,7 +351,7 @@ class Cluster(object):
                     assert nso.service_start('elasticsearch')
                     time.sleep(15)
                     assert nso.wait_for_service_status('elasticsearch', True)
-                self.wait_until_node_joins(node.name)
+                self.wait_until_node_joins(node.name, uptime_less_than=node.uptime.total_seconds())
 
         return self.rolling_helper(
             upgrade, node_filter,
