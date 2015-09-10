@@ -159,7 +159,7 @@ class NodeSaltOps(object):
         self.node = node
         if not saltcli:
             saltcli = salt.client.LocalClient()
-        salt.s = saltcli
+        self.s = saltcli
 
     def cmd(self, fun, arg=(), kwarg=None, quiet=False):
         '''
