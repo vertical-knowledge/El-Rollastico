@@ -3,15 +3,18 @@ from setuptools import setup
 __version__ = '0.0.1'  # This is ovewritten by the execfile below
 exec (open('rollastic/_version.py').read())
 
-setup(
+conf = dict(
     name='rollastic',
-    version=__version__,
-    packages=['rollastic'],
-    url='',
-    license='GPL',
+    description='ElasticSearch cluster management via SaltStack -- rolling restarts/upgrades',
+    url='http://github.com/vertical-knowledge/rollastic',
     author='VK',
     author_email='vk@vertical-knowledge.com',
-    description='ElasticSearch cluster management via SaltStack -- rolling restarts/upgrades',
+    license='GPL',
+    keywords=['elasticsearch', 'elastic', 'cluster', 'salt', 'saltstack', 'rolling', 'upgrade', 'restart'],
+    classifiers=[],
+
+    version=__version__,
+    packages=['rollastic'],
     entry_points={
         'console_scripts': [
             'rollastic = rollastic.__main__:cli',
@@ -28,3 +31,9 @@ setup(
         # ],
     },
 )
+
+conf.update(dict(
+    download_url='{}/tarball/{}'.format(conf['url'], conf['version']),
+))
+
+setup(**conf)
