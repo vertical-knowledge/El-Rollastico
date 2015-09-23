@@ -149,6 +149,9 @@ class Cluster(object):
         while True:
             for n in self.iter_nodes():
                 if n.name == name:
+                    if not n.uptime:
+                        _LOG.warn('Found node %s but it was lacking uptime?', n)
+                        continue
                     uptime = n.uptime.total_seconds()
                     if not uptime:
                         _LOG.warn('Found node %s but uptime=%s?', n, uptime)
@@ -161,8 +164,8 @@ class Cluster(object):
                         _LOG.debug('Found node %s but uptime=%s was above uptime_less_than=%s',
                                    name, uptime, uptime_less_than)
                         continue
-                    _LOG.info('Found node %s with uptime=%s was within freshness_window=%ds',
-                              name, uptime, freshness_window)
+                    _LOG.info('Found node %s with uptime=%s was within freshness_window=%ds and uptime_less_than=%s',
+                              name, uptime, freshness_window, uptime_less_than)
                     return n
             time.sleep(check_every)
 
