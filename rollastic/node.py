@@ -126,19 +126,6 @@ class Node(dict):
             if v:
                 return v
 
-    def shutdown(self):
-        '''
-        Shutdown node through ES API
-
-        :return:
-        :rtype:
-        '''
-        _LOG.info('Shutting down node=%s through elasticsearch API', self)
-        assert self.name
-        ret = self.cluster.es.nodes.shutdown(self.name)
-        _LOG.debug(ret)
-        return ret
-
 
 class NodeSaltOps(object):
     '''
@@ -205,6 +192,15 @@ class NodeSaltOps(object):
         _LOG.info('Starting service=%s', name)
         return bool(self.cmd('service.start', [name]))
 
+    def service_stop(self, name):
+        '''
+        :param str name: Service name
+        :return: Bool if service was stopped
+        :rtype: bool
+        '''
+        _LOG.info('Stopping service=%s', name)
+        return bool(self.cmd('service.stop', [name]))
+
     def wait_for_service_status(self, name, status, check_every=10, timeout_iterations=6):
         '''
         Waits for service status with specified timeout.
@@ -246,8 +242,7 @@ class NodeSaltOps(object):
         :rtype: bool
         '''
         _LOG.info('Ensuring elasticsearch is dead on node=%s', self.node)
-
-        self.node.shutdown()
+        self.service_stop('elasticsearch')
 
         # This will wait for up to one minute
         dead = self.wait_for_service_status('elasticsearch', False)
