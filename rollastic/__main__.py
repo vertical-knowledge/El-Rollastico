@@ -32,7 +32,7 @@ def restart(master_node, kill_at_heap, masters, datas):
         If node's heap used percentage is over kill-at-heap:
         * Disable cluster allocation
         * Ping node through Salt to verify connectivity
-        * Shutdown node through ES API
+        * Shutdown node
         * Wait for ES to die for 2m.
           If it's not dead, run a killall java and wait another 2m.
           If it's still not dead, fail.
@@ -70,7 +70,7 @@ def upgrade(master_node, masters, datas, minimum_version):
         * Ping node through Salt to verify connectivity
         * Run a Salt highstate
         * Check for an available upgrade on the Elasticsearch package, if so:
-          - Shutdown node through ES API
+          - Shutdown node
           - Wait for ES to die for 2m.
             If it's not dead, run a killall java and wait another 2m.
             If it's still not dead, fail.

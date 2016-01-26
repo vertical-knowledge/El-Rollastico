@@ -21,8 +21,6 @@ Usage
 
 ### Restart
 
-This currently requires Salt to restart the service after shutting it down.
-
 ```
 Usage: rollastic restart [OPTIONS] MASTER_NODE
 
@@ -40,7 +38,7 @@ Usage: rollastic restart [OPTIONS] MASTER_NODE
       If node's heap used percentage is over kill-at-heap:
       * Disable cluster allocation
       * Ping node through Salt to verify connectivity
-      * Shutdown node through ES API
+      * Shutdown node
       * Wait for ES to die for 2m.
         If it's not dead, run a killall java and wait another 2m.
         If it's still not dead, fail.
@@ -58,8 +56,6 @@ Options:
 ```
 
 ### Upgrade
-
-This works hand in hand with our fork of the elasticsearch Salt formula: https://github.com/vkgit/saltstack-elasticsearch-formula
 
 ```
 Usage: rollastic upgrade [OPTIONS] MASTER_NODE
@@ -80,7 +76,7 @@ Usage: rollastic upgrade [OPTIONS] MASTER_NODE
       * Ping node through Salt to verify connectivity
       * Run a Salt highstate
       * Check for an available upgrade on the Elasticsearch package, if so:
-        - Shutdown node through ES API
+        - Shutdown node
         - Wait for ES to die for 2m.
           If it's not dead, run a killall java and wait another 2m.
           If it's still not dead, fail.
