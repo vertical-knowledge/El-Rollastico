@@ -30,6 +30,7 @@ class Node(dict):
         '''
         self.cluster = cluster
         self.node_id = node_id
+        self.badcount = 0
         if self.node_id:
             self.populate()
 
@@ -54,17 +55,26 @@ class Node(dict):
         self.clear()
 
         info = self.cluster.es.nodes.info(self.node_id)['nodes'].get(self.node_id, {})
+        isbad = False
         if not info:
             msg = "Bad result for node info. node_id={0} info={1}".format(self.node_id, info)
-            _LOG.error(msg)
-            raise Exception(msg)
+            _LOG.warning(msg)
+            isbad = True
         self.update(info)
 
         stats = self.cluster.es.nodes.stats(self.node_id)['nodes'].get(self.node_id, {})
         if not stats:
             msg = "Bad result for node stats. node_id={0} stats={1}".format(self.node_id, stats)
-            _LOG.error(msg)
-            raise Exception(msg)
+            _LOG.warning(msg)
+            isbad = True
+
+        # Make sure that we don't infintely wait on nodes that can't get a good result
+        if isbad:
+            self.badcount += 1
+            if self.badcount > 10:
+                raise Exception("Too many bad results for while populating node. node_id={0}".format(self.node_id))
+        else:
+            self.badcount = 0
         self.update(stats)
 
     @property
