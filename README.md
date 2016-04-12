@@ -90,5 +90,13 @@ Options:
   --masters / --no-masters  Restart master nodes as well [false]
   --datas / --no-datas      Restart data nodes [true]
   --minimum-version TEXT    Minimum version to upgrade to [1.7.1]
+  --hold                    Override held elasticsearch package mark, and re-
+                            mark as held once upgraded. Cannot be combined
+                            with the --unhold flag. This works on Debian
+                            based systems only.
+  --unhold                  Override held elasticsearch package mark, and
+                            unhold package once upgraded. Cannot be combined
+                            with the --hold flag. This works on Debian based
+                            systems only.
   --help                    Show this message and exit.
 ```
