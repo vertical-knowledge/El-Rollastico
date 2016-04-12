@@ -55,14 +55,14 @@ class Node(dict):
 
         info = self.cluster.es.nodes.info(self.node_id)['nodes'].get(self.node_id, {})
         if not info:
-            msg = "Bad result for node info. node_id={} info={}".format(self.node_id, info)
+            msg = "Bad result for node info. node_id={0} info={1}".format(self.node_id, info)
             _LOG.error(msg)
             raise Exception(msg)
         self.update(info)
 
         stats = self.cluster.es.nodes.stats(self.node_id)['nodes'].get(self.node_id, {})
         if not stats:
-            msg = "Bad result for node stats. node_id={} stats={}".format(self.node_id, stats)
+            msg = "Bad result for node stats. node_id={0} stats={1}".format(self.node_id, stats)
             _LOG.error(msg)
             raise Exception(msg)
         self.update(stats)
