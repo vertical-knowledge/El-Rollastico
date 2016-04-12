@@ -1,6 +1,8 @@
 Rollastic
 =========
 
+[![Join the chat at https://gitter.im/vertical-knowledge/rollastic](https://badges.gitter.im/vertical-knowledge/rollastic.svg)](https://gitter.im/vertical-knowledge/rollastic?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 Elasticsearch cluster management, namely rolling restart and upgrades.
 Your cluster should be deployed/managed via SaltStack; this is meant to be ran on your Salt master.
 
