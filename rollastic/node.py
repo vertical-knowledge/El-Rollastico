@@ -19,7 +19,7 @@ class Node(dict):
     Represents a cluster node.
     '''
 
-    def __init__(self, cluster, node_id=None):
+    def __init__(self, cluster, node_id=None, bad_result_maximum=10):
         '''
         Init
 
@@ -30,7 +30,9 @@ class Node(dict):
         '''
         self.cluster = cluster
         self.node_id = node_id
-        self.badcount = 0
+        self.bad_result_maximum = bad_result_maximum
+        self.bad_result_count = 0
+        
         if self.node_id:
             self.populate()
 
@@ -54,28 +56,26 @@ class Node(dict):
         '''
         self.clear()
 
-        info = self.cluster.es.nodes.info(self.node_id)['nodes'].get(self.node_id, {})
-        isbad = False
-        if not info:
-            msg = "Bad result for node info. node_id={0} info={1}".format(self.node_id, info)
-            _LOG.warning(msg)
-            isbad = True
-        self.update(info)
+        try:
+            info = self.cluster.es.nodes.info(self.node_id)['nodes'].get(self.node_id, {})
+            self.update(info)
 
-        stats = self.cluster.es.nodes.stats(self.node_id)['nodes'].get(self.node_id, {})
-        if not stats:
-            msg = "Bad result for node stats. node_id={0} stats={1}".format(self.node_id, stats)
-            _LOG.warning(msg)
-            isbad = True
+            stats = self.cluster.es.nodes.stats(self.node_id)['nodes'].get(self.node_id, {})
+            self.update(stats)
 
-        # Make sure that we don't infintely wait on nodes that can't get a good result
-        if isbad:
-            self.badcount += 1
-            if self.badcount > 10:
-                raise Exception("Too many bad results for while populating node. node_id={0}".format(self.node_id))
-        else:
-            self.badcount = 0
-        self.update(stats)
+            if not stats or info:
+                raise Exception("Failed to retrieve values from node. node_id={0} info={1} stats={2}".format(
+                    self.node_id, info, stats))
+
+            # reset the counter to zero because we only care about tracking consecutive bad results from the node
+            self.bad_result_count = 0
+        except Exception as e:
+            self.bad_result_count += 1
+            _LOG.warning("{0} (failure {1} of {2}".format(str(e), self.bad_result_count, self.bad_result_maximum))
+
+            if self.bad_result_count > self.bad_result_maximum:
+                raise Exception("Reached max failure count when retrieving information from node. node_id={0}".format(
+                    self.node_id))
 
     @property
     def name(self):
