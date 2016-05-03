@@ -64,18 +64,18 @@ class Node(dict):
             self.update(stats)
 
             if not stats or info:
-                raise Exception("Failed to retrieve values from node. node_id={0} info={1} stats={2}".format(
-                    self.node_id, info, stats))
+                raise Exception("Failed to retrieve values from node. node_id=%s info=%s stats=%s",
+                                self.node_id, info, stats)
 
             # reset the counter to zero because we only care about tracking consecutive bad results from the node
             self.bad_result_count = 0
         except Exception as e:
             self.bad_result_count += 1
-            _LOG.warning("{0} (failure {1} of {2}".format(str(e), self.bad_result_count, self.bad_result_maximum))
+            _LOG.warning("{0} (failure {1} of {2})".format(str(e), self.bad_result_count, self.bad_result_maximum))
 
             if self.bad_result_count > self.bad_result_maximum:
-                raise Exception("Reached max failure count when retrieving information from node. node_id={0}".format(
-                    self.node_id))
+                raise Exception("Reached max failure count when retrieving information from node. node_id=%s",
+                                self.node_id)
 
     @property
     def name(self):
