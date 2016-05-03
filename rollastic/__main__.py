@@ -58,6 +58,10 @@ def restart(master_node, kill_at_heap, masters, datas, highstate):
 @click.option('--masters/--no-masters', default=False, help='Restart master nodes as well [false]')
 @click.option('--datas/--no-datas', default=True, help='Restart data nodes [true]')
 @click.option('--minimum-version', default='1.7.1', help='Minimum version to upgrade to [1.7.1]')
+@click.option('--hold', is_flag=True, default=False, help='Override ''held'' elasticsearch package mark, and re-mark as ''held'' once upgraded. '
+              'Cannot be combined with the --unhold flag. This works on Debian based systems only.')
+@click.option('--unhold', is_flag=True, default=False, help='Override ''held'' elasticsearch package mark, and ''unhold'' package once upgraded. '
+              'Cannot be combined with the --hold flag. This works on Debian based systems only.')
 def upgrade(master_node, masters, datas, minimum_version, hold, unhold):
     '''
     Rolling upgrade of cluster.
@@ -85,12 +89,20 @@ def upgrade(master_node, masters, datas, minimum_version, hold, unhold):
         * Enable allocation
         * Wait until cluster is in green health
     '''
-    _LOG.info('Rolling upgrade with master_node=%s and minimum_version=%s', master_node, minimum_version)
-
+    # Assert that incompatible arguments are not specified, and determine hold policy
+    assert not (hold and unhold)
+    hold_package = None
+    if hold:
+        hold_package = True
+    elif unhold:
+        hold_package = False
+    
+    _LOG.info('Rolling upgrade with master_node=%s and minimum_version=%s, hold_package=%s', master_node, minimum_version, hold_package)
+    
     cluster = Cluster(master_node)
     _LOG.info('Cluster status: %s', cluster.status())
-    cluster.rolling_upgrade(master=masters, data=datas, minimum_version=minimum_version)
+    cluster.rolling_upgrade(master=masters, data=datas, minimum_version=minimum_version, hold_package=hold_package)
 
-
+    
 if __name__ == '__main__':
     cli(auto_envvar_prefix='ROLLASTIC')
