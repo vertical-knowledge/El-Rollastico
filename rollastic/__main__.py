@@ -17,7 +17,9 @@ def cli():
 @click.option('--datas/--no-datas', default=True, help='Restart data nodes [true]')
 @click.option('--kill-at-heap', default=85, help='Heap used percentage threshold to restart that node [85]',
               type=click.INT)
-def restart(master_node, kill_at_heap, masters, datas):
+@click.option('--highstate/--no-highstate', default=False,
+              help='Run a highstate on each node prior to rolling. ES restart from a highstate is taken into account.')
+def restart(master_node, kill_at_heap, masters, datas, highstate):
     '''
     Rolling restart of cluster.
 
@@ -32,11 +34,14 @@ def restart(master_node, kill_at_heap, masters, datas):
         If node's heap used percentage is over kill-at-heap:
         * Disable cluster allocation
         * Ping node through Salt to verify connectivity
-        * Shutdown node
-        * Wait for ES to die for 2m.
-          If it's not dead, run a killall java and wait another 2m.
-          If it's still not dead, fail.
-        * Start elasticsearch service through Salt
+        * If --highstate was specified, run a highstate:
+          If the highstate fails, fail Rollastic.
+        * If ES service was not restarted during a highstate:
+          * Shutdown node
+          * Wait for ES to die for 2m.
+            If it's not dead, run a killall java and wait another 2m.
+            If it's still not dead, fail.
+          * Start elasticsearch service through Salt
         * Wait until node joins cluster with an uptime within 120s.
         * Enable allocation
         * Wait until cluster is in green health
@@ -45,7 +50,7 @@ def restart(master_node, kill_at_heap, masters, datas):
 
     cluster = Cluster(master_node)
     _LOG.info('Cluster status: %s', cluster.status())
-    cluster.rolling_restart(master=masters, data=datas, heap_used_percent_threshold=kill_at_heap)
+    cluster.rolling_restart(master=masters, data=datas, heap_used_percent_threshold=kill_at_heap, highstate=highstate)
 
 
 @cli.command()
