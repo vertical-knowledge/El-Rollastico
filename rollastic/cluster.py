@@ -8,8 +8,8 @@ from distutils.version import LooseVersion
 import elasticsearch
 import time
 import types
-
-
+from os import linesep as LINESEP
+from json import dumps as jsondumps
 class Cluster(object):
     '''
     Represents an ES cluster.
@@ -233,7 +233,7 @@ class Cluster(object):
                     self.wait_until_green()
 
     def rolling_restart(self, master=False, data=True, initial_wait_until_green=True,
-                        heap_used_percent_threshold=85):
+                        heap_used_percent_threshold=85, highstate=False):
         '''
         Rolling restart.
 
@@ -245,8 +245,10 @@ class Cluster(object):
         :type initial_wait_until_green: bool
         :param heap_used_percent_threshold: Threshold of heap used (percentage) to initiate a roll. Use -1 to do all.
         :type heap_used_percent_threshold: int
+        :param highstate: Run a highstate prior to rolling the node.
+        :type highstate: bool
         '''
-        _LOG.info('Performing rolling restart on %s', self)
+        _LOG.info('Performing rolling restart %son %s', 'with highstate ' if highstate else '', self)
 
         # TODO Allow this to be ran without Salt again (states must restart ES on their own, eg swap to upstart)
         if not HAS_SALT:
@@ -262,14 +264,39 @@ class Cluster(object):
             _LOG.info('Verifying I can ping node=%s through Salt', node)
             assert nso.ping()
 
-            ''' Shutdown '''
+            ''' Highstate '''
+            highstate_restarted = False
+            if highstate:
+                _LOG.info('Running a highstate on node=%s', node)
+                ret = nso.cmd('state.highstate', quiet=True)
 
-            assert nso.ensure_elasticsearch_is_dead()
+                # Check for changes in the elasticsearch service from highstate run
+                svc_changes = ret['service_|-elasticsearch_|-elasticsearch_|-running']['changes']
+                if svc_changes:
+                    highstate_restarted = True
+                    _LOG.info('Salt elasticsearch service changes: %s', svc_changes)
+                else:
+                    _LOG.info('Salt reported that no changes were performed on the elasticsearch service.')
 
-            ''' Start '''
+                # Check that the highstate succeeded on all items
+                for saltmaster, val in ret.items():
+                    for state, val2 in val.items():
+                        if not state['result']:
+                            raise Exception("Highstate failed on node=%s%s%s",
+                                            node.name, LINESEP, jsondumps(val2, indent=2))
 
-            assert nso.service_start('elasticsearch')
-            time.sleep(15)
+            # Restart Elasticsearch if the highstate did not restart the service
+            if not highstate_restarted:
+            
+                ''' Shutdown '''
+                
+                assert nso.ensure_elasticsearch_is_dead()
+
+                ''' Start '''
+
+                assert nso.service_start('elasticsearch')
+                time.sleep(15)
+                
             assert nso.wait_for_service_status('elasticsearch', True)
 
             ''' Wait until node joins '''
@@ -285,6 +312,7 @@ class Cluster(object):
         )
 
     def rolling_upgrade(self, minimum_version=None, master=False, data=True, initial_wait_until_green=True, hold_package=None):
+
         '''
         Rolling upgrade.
 
@@ -316,6 +344,7 @@ class Cluster(object):
             nso = NodeSaltOps(node)
             bool(nso.cmd('pkg.hold', 'elasticsearch'))
 
+        
         def node_filter(self, node):
             if not minimum_version:
                 return True
@@ -360,7 +389,6 @@ class Cluster(object):
                         _LOG.info('Package is held but ''--unhold'' was specified. '
                                   'Forcing permanent unhold of elasticsearch package.')
                     assert unhold_es_package(node)
-                
                 try:
                     _LOG.info('Working around broken pkg.latest in Salt')
 
