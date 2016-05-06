@@ -279,8 +279,8 @@ class Cluster(object):
                     _LOG.info('Salt reported that no changes were performed on the elasticsearch service.')
 
                 # Check that the highstate succeeded on all items
-                for saltmaster, val in ret.iteritems():
-                    for state, val2 in val.iteritems():
+                for saltmaster, val in ret.items():
+                    for state, val2 in val.items():
                         if not state['result']:
                             raise Exception("Highstate failed on node=%s%s%s",
                                             node.name, LINESEP, jsondumps(val2, indent=2))
