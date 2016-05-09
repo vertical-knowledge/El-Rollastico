@@ -263,20 +263,15 @@ class Cluster(object):
 
             _LOG.info('Verifying I can ping node=%s through Salt', node)
             assert nso.ping()
+            
+            ''' Shutdown '''
+                
+            assert nso.ensure_elasticsearch_is_dead()
 
             ''' Highstate '''
-            highstate_restarted = False
             if highstate:
                 _LOG.info('Running a highstate on node=%s', node)
                 ret = nso.cmd('state.highstate', quiet=True)
-
-                # Check for changes in the elasticsearch service from highstate run
-                svc_changes = ret['service_|-elasticsearch_|-elasticsearch_|-running']['changes']
-                if svc_changes:
-                    highstate_restarted = True
-                    _LOG.info('Salt elasticsearch service changes: %s', svc_changes)
-                else:
-                    _LOG.info('Salt reported that no changes were performed on the elasticsearch service.')
 
                 # Check that the highstate succeeded on all items
                 # Note that when running state.highstate, the saltmaster is NOT the top level item in
@@ -285,18 +280,12 @@ class Cluster(object):
                     if val['result']:
                         raise Exception("Highstate failed on node=%s%s%s",
                                         node.name, LINESEP, jsondumps(val, indent=2))
-
-            # Restart Elasticsearch if the highstate did not restart the service
-            if not highstate_restarted:
             
-                ''' Shutdown '''
-                
-                assert nso.ensure_elasticsearch_is_dead()
 
-                ''' Start '''
+            ''' Start '''
 
-                assert nso.service_start('elasticsearch')
-                time.sleep(15)
+            assert nso.service_start('elasticsearch')
+            time.sleep(15)
                 
             assert nso.wait_for_service_status('elasticsearch', True)
 
