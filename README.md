@@ -40,18 +40,16 @@ Usage: rollastic restart [OPTIONS] MASTER_NODE
       If node's heap used percentage is over kill-at-heap:
       * Disable cluster allocation
       * Ping node through Salt to verify connectivity
+      * Shutdown node
+      * Wait for ES to die for 2m.
+        If it's not dead, run a killall java and wait another 2m.
+        If it's still not dead, fail.
       * If --highstate was specified, run a highstate:
         If the highstate fails, fail Rollastic.
-      * If ES service was not restarted during a highstate:
-        * Shutdown node
-        * Wait for ES to die for 2m.
-          If it's not dead, run a killall java and wait another 2m.
-          If it's still not dead, fail.
-        * Start elasticsearch service through Salt
+      * Start elasticsearch service through Salt
       * Wait until node joins cluster with an uptime within 120s.
       * Enable allocation
       * Wait until cluster is in green health
-
 Options:
   --masters / --no-masters   Restart master nodes as well [false]
   --datas / --no-datas       Restart data nodes [true]
