@@ -277,7 +277,7 @@ class Cluster(object):
                 # Note that when running state.highstate, the saltmaster is NOT the top level item in
                 # the returned dict, though state.sls has the saltmaster id as the toplevel item
                 for state, val in ret.items():
-                    if val['result']:
+                    if not val['result']:
                         raise Exception("Highstate failed on node=%s%s%s",
                                         node.name, LINESEP, jsondumps(val, indent=2))
             
