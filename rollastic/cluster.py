@@ -281,12 +281,11 @@ class Cluster(object):
                         raise Exception("Highstate failed on node=%s%s%s",
                                         node.name, LINESEP, jsondumps(val, indent=2))
             
+            ''' Start (if not started during highstate) '''
+            if not nso.service_status('elasticsearch', True):
+                assert nso.service_start('elasticsearch')
+                time.sleep(15)
 
-            ''' Start '''
-
-            assert nso.service_start('elasticsearch')
-            time.sleep(15)
-                
             assert nso.wait_for_service_status('elasticsearch', True)
 
             ''' Wait until node joins '''
