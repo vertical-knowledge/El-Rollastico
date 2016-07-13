@@ -1,12 +1,12 @@
 from setuptools import setup
 
 __version__ = '0.0.1'  # This is ovewritten by the execfile below
-exec (open('rollastic/_version.py').read())
+exec (open('el_rollastico/_version.py').read())
 
 conf = dict(
-    name='rollastic',
+    name='el_rollastico',
     description='Automated ElasticSearch cluster rolling restarts/upgrades via SaltStack',
-    url='http://github.com/vertical-knowledge/rollastic',
+    url='http://github.com/vertical-knowledge/el_rollastico',
     author='VK',
     author_email='vk@vertical-knowledge.com',
     license='GPL',
@@ -14,10 +14,11 @@ conf = dict(
     classifiers=[],
 
     version=__version__,
-    packages=['rollastic'],
+    packages=['el_rollastico'],
     entry_points={
         'console_scripts': [
-            'rollastic = rollastic.__main__:cli',
+            'rollastic = el_rollastico.__main__:cli',
+            'el_rollastico = el_rollastico.__main__:cli',
         ]
     },
 

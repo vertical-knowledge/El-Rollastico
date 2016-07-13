@@ -1,4 +1,4 @@
-from rollastic.log import get_logger
+from el_rollastico.log import get_logger
 
 _LOG = get_logger()
 

@@ -1,8 +1,8 @@
-from rollastic.log import get_logger
+from el_rollastico.log import get_logger
 
 _LOG = get_logger()
 
-from rollastic.node import Node, NodeSaltOps, HAS_SALT
+from el_rollastico.node import Node, NodeSaltOps, HAS_SALT
 
 from distutils.version import LooseVersion
 import elasticsearch
@@ -314,7 +314,7 @@ class Cluster(object):
         :type data: bool
         :param initial_wait_until_green: Wait until cluster is green before rolling
         :type initial_wait_until_green: bool
-        :param hold_package: True or False will override the package hold mark. True will set 'hold' and False will set to 'unhold' post-upgrade. None will do nothing with the package mark, but will fail rollastic if the package is marked to be 'held'.
+        :param hold_package: True or False will override the package hold mark. True will set 'hold' and False will set to 'unhold' post-upgrade. None will do nothing with the package mark, but will fail el_rollastico if the package is marked to be 'held'.
         :type hold_package: bool
         '''
         _LOG.info('Performing rolling upgrade on %s', self)
