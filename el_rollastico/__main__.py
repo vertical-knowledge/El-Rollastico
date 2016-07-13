@@ -1,8 +1,8 @@
-from rollastic.log import get_logger
+from el_rollastico.log import get_logger
 
 _LOG = get_logger()
 
-from rollastic.cluster import Cluster
+from el_rollastico.cluster import Cluster
 import click
 
 
@@ -23,7 +23,7 @@ def restart(master_node, kill_at_heap, masters, datas, highstate):
     '''
     Rolling restart of cluster.
 
-    MASTER_NODE is the initial node to query to get the list of master nodes to connect to. Rollastic will connect to all master nodes to avoid relying on one to be up for the roll procedure.
+    MASTER_NODE is the initial node to query to get the list of master nodes to connect to. El_Rollastico will connect to all master nodes to avoid relying on one to be up for the roll procedure.
 
     \b
     This will:
@@ -39,7 +39,7 @@ def restart(master_node, kill_at_heap, masters, datas, highstate):
           If it's not dead, run a killall java and wait another 2m.
           If it's still not dead, fail.
         * If --highstate was specified, run a highstate:
-          If the highstate fails, fail Rollastic.
+          If the highstate fails, fail El_Rollastico.
         * Start elasticsearch service through Salt
         * Wait until node joins cluster with an uptime within 120s.
         * Enable allocation
@@ -65,7 +65,7 @@ def upgrade(master_node, masters, datas, minimum_version, hold, unhold):
     '''
     Rolling upgrade of cluster.
 
-    MASTER_NODE is the initial node to query to get the list of master nodes to connect to. Rollastic will connect to all master nodes to avoid relying on one to be up for the roll procedure.
+    MASTER_NODE is the initial node to query to get the list of master nodes to connect to. El_Rollastico will connect to all master nodes to avoid relying on one to be up for the roll procedure.
 
     \b
     This will:

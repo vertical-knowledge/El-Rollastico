@@ -2,7 +2,7 @@ import logging
 import logging.config
 import inspect
 
-from rollastic import config
+from el_rollastico import config
 
 _CONFIGURED = False
 

@@ -1,5 +1,5 @@
-Rollastic
-=========
+El_Rollastico
+=============
 
 [![Join the chat at https://gitter.im/vertical-knowledge/rollastic](https://badges.gitter.im/vertical-knowledge/rollastic.svg)](https://gitter.im/vertical-knowledge/rollastic?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
@@ -10,12 +10,15 @@ While currently not a *hard* requirement (as far as states applied on an upgrade
 recommend to use our fork of the elasticsearch Salt formula: https://github.com/vkgit/saltstack-elasticsearch-formula,
 as further integration will happen in the future.
 
+Note
+----
+This project was previously named 'rollastic'. Previous versions of el_rollastico can be still be found on PyPi with the rollastic name.
 
 Install
 -------
 
 ```
-pip install rollastic
+pip install el_rollastico
 ```
 
 Usage
@@ -24,12 +27,16 @@ Usage
 ### Restart
 
 ```
+Usage: el_rollastico restart [OPTIONS] MASTER_NODE
+
+or
+
 Usage: rollastic restart [OPTIONS] MASTER_NODE
 
   Rolling restart of cluster.
 
   MASTER_NODE is the initial node to query to get the list of master nodes
-  to connect to. Rollastic will connect to all master nodes to avoid relying
+  to connect to. El_Rollastic will connect to all master nodes to avoid relying
   on one to be up for the roll procedure.
 
   This will:
@@ -45,7 +52,7 @@ Usage: rollastic restart [OPTIONS] MASTER_NODE
         If it's not dead, run a killall java and wait another 2m.
         If it's still not dead, fail.
       * If --highstate was specified, run a highstate:
-        If the highstate fails, fail Rollastic.
+        If the highstate fails, fail El_Rollastico.
       * Start elasticsearch service through Salt
       * Wait until node joins cluster with an uptime within 120s.
       * Enable allocation
@@ -63,12 +70,16 @@ Options:
 ### Upgrade
 
 ```
+Usage: el_rollastico upgrade [OPTIONS] MASTER_NODE
+
+or
+
 Usage: rollastic upgrade [OPTIONS] MASTER_NODE
 
   Rolling upgrade of cluster.
 
   MASTER_NODE is the initial node to query to get the list of master nodes
-  to connect to. Rollastic will connect to all master nodes to avoid relying
+  to connect to. El_Rollastico will connect to all master nodes to avoid relying
   on one to be up for the roll procedure.
 
   This will:

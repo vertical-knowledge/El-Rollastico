@@ -14,7 +14,7 @@ LOGGING = {
         # 'logfile': {
         #     'formatter': 'standard',
         #     'class': 'logging.FileHandler',
-        #     'filename': 'rollastic.log',
+        #     'filename': 'el_rollastico.log',
         # },
     },
     'root': {
@@ -22,7 +22,7 @@ LOGGING = {
         'level': 'INFO',
     },
     'loggers': {
-        'rollastic': dict(level='DEBUG'),
+        'el_rollastico': dict(level='DEBUG'),
 
         # These are super noisy
         'elasticsearch': dict(level='WARNING'),
