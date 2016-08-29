@@ -68,19 +68,39 @@ class Cluster(object):
         ret = self.es.cluster.put_settings({cat: settings})
         return ret['acknowledged'] is True
 
-    def disable_allocation(self):
-        _LOG.info('Disabling allocation')
-        return self.put_settings({
-            'cluster.routing.allocation.disable_allocation': 'true',
-            # 'cluster.routing.allocation.node': 'none',
-        })
+    def disable_allocation(self, v2=False):
+        '''
+        Disable cluster allocation
 
-    def enable_allocation(self):
+        :param v2: Set to True to use api as compatible with 2.x
+        '''
+        _LOG.info('Disabling allocation')
+        if v2:
+            return self.put_settings({
+                'cluster.routing.allocation.enable': 'none'
+            })
+        else:
+            return self.put_settings({
+                'cluster.routing.allocation.disable_allocation': 'true',
+                # 'cluster.routing.allocation.node': 'none',
+            })
+
+    def enable_allocation(self, v2=False):
+        '''
+        Enable cluster allocation
+
+        :param v2: Set to True to use api as compatible with 2.x
+        '''
         _LOG.info('Enabling allocation')
-        return self.put_settings({
-            'cluster.routing.allocation.disable_allocation': 'false',
-            # 'cluster.routing.allocation.node': 'all',
-        })
+        if v2:
+            return self.put_settings({
+                'cluster.routing.allocation.enable': 'all'
+            })
+        else:
+            return self.put_settings({
+                'cluster.routing.allocation.disable_allocation': 'false',
+                # 'cluster.routing.allocation.node': 'all',
+            })
 
     def status(self):
         '''
@@ -216,19 +236,24 @@ class Cluster(object):
         if data:
             roll_nodes.extend(data_nodes)
         _LOG.debug('roll_nodes=%s', roll_nodes)
-
+        
         for node in roll_nodes:
             _LOG.debug('Node: %s', node)
             if node_filter(self, node):
                 _LOG.info('Node matched filter: %s', node)
+
+                is_v2 = False
+                if LooseVersion(node.version) >= LooseVersion('2.0.0'):
+                    is_v2 = True
+                
                 if disable_allocation:
-                    self.disable_allocation()
+                    self.disable_allocation(v2=is_v2)
 
                 # ready to run callback at this point
                 callback(self, node)
 
                 if disable_allocation:
-                    self.enable_allocation()
+                    self.enable_allocation(v2=is_v2)
                 if wait_until_green:
                     self.wait_until_green()
 

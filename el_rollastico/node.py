@@ -2,6 +2,7 @@ from el_rollastico.log import get_logger
 
 _LOG = get_logger()
 
+from distutils.version import LooseVersion
 from datetime import timedelta
 import time
 import re
@@ -119,12 +120,17 @@ class Node(dict):
         :rtype: str
         '''
         http_addr = self['http_address']
-        m = re.match(r'^inet\[(?P<publish_host>[^/]*)/(?P<publish_ip>[^\]]+)]$', http_addr)
-        if not m:
-            raise Exception('Could not match http_address: %s' % http_addr)
-        for v in m.groups():
-            if v:
-                return v
+        
+        if LooseVersion(self.version) <= LooseVersion('2.0.0'):
+            m = re.match(r'^inet\[(?P<publish_host>[^/]*)/(?P<publish_ip>[^\]]+)]$', http_addr)
+            if not m:
+                raise Exception('Could not match http_address: %s' % http_addr)
+            for v in m.groups():
+                if v:
+                    return v
+        else:
+            # 2.x just returns the hostname, no BS
+            return http_addr
 
 
 class NodeSaltOps(object):
